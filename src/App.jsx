@@ -19,6 +19,7 @@ function App() {
         department: 'Engineering',
         bankAccount: '1234567890',
         panNumber: 'ABCDE1234F',
+        ifscCode: 'HDFC0001234',
       },
       salaryDetails: {
         month: new Date().getMonth() + 1,

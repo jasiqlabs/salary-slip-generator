@@ -74,9 +74,84 @@ export const Preview = ({ isGenerating, setIsGenerating }) => {
     window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
   };
 
-  const handleShareViaWhatsApp = () => {
+  // const handleShareViaWhatsApp = () => {
+  //   const message = `Here's your salary slip for ${monthName} ${salaryDetails.year}.`;
+  //   window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+  // };
+
+const handleShareViaWhatsApp = async () => {
+    if (isGenerating) return; // Prevent double clicks
+    setIsGenerating(true);
+    
     const message = `Here's your salary slip for ${monthName} ${salaryDetails.year}.`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    try {
+      // 1. Generate PDF Blob (Same as before)
+      if (!previewRef.current) return;
+      
+      const canvas = await html2canvas(previewRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+      
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const pdfBlob = pdf.output('blob');
+      const file = new File([pdfBlob], `Salary_Slip_${employee.name}.pdf`, { type: 'application/pdf' });
+
+      // 2. SMART SHARE LOGIC
+      if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
+        // MOBILE: Use native share (Directly attaches file to WhatsApp)
+        await navigator.share({
+          files: [file],
+          title: 'Salary Slip',
+          text: message,
+        });
+      } else {
+        // DESKTOP: Download file + Open WhatsApp Web
+        // We trigger the download immediately so the user has the file
+        pdf.save(`Salary_Slip_${employee.name}.pdf`);
+        
+        // Then we open WhatsApp Web in a new tab with the message ready
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        
+        // Optional: Alert the user so they know what to do
+        alert("Because you are on a computer, we have downloaded the PDF. Please drag and drop it into the WhatsApp chat!");
+      }
+
+    } catch (error) {
+      // Ignore "AbortError" (User closed the share menu)
+      if (error.name !== 'AbortError') {
+        console.error('Error sharing:', error);
+        // Final fallback
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+      }
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   if (!isClient) {
@@ -167,6 +242,12 @@ export const Preview = ({ isGenerating, setIsGenerating }) => {
               <h3 className="text-sm font-medium text-gray-500">Bank Account</h3>
               <p className="text-gray-900">{employee.bankAccount}</p>
             </div>
+            
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">IFSC Code</h3>
+              <p className="text-gray-900">{employee.ifscCode}</p>
+            </div>
+            
             <div>
               <h3 className="text-sm font-medium text-gray-500">PAN Number</h3>
               <p className="text-gray-900">{employee.panNumber}</p>

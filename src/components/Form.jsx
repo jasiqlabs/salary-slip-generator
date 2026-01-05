@@ -116,6 +116,41 @@ export const Form = () => {
               placeholder="Enter department"
             />
           </div>
+
+
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account</label>
+            <input
+              type="text"
+              {...register('employee.bankAccount')}
+              className="w-full"
+              placeholder="Enter bank account no"
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">PAN Number</label>
+            <input
+              type="text"
+              {...register('employee.panNumber')}
+              className="w-full"
+              placeholder="Enter PAN number"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">IFSC Code</label>
+            <input
+              type="text"
+              {...register('employee.ifscCode')} 
+              className="w-full uppercase" // uppercase isliye taaki code capital me likha jaye
+              placeholder="Enter IFSC Code"
+              maxLength={11} // IFSC code usually 11 characters ka hota hai
+            />
+          </div>
+
+
         </div>
       </div>
 
@@ -173,9 +208,9 @@ export const Form = () => {
             <button
               type="button"
               onClick={addEarning}
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+              className="inline-flex items-center text-sm text-white hover:text-yellow"
             >
-              <Plus className="h-4 w-4 mr-1" /> Add Earning
+              <Plus className="h-4 w-4 mr-1 text-white" /> Add Earning
             </button>
           </div>
           <div className="space-y-2">
@@ -215,9 +250,9 @@ export const Form = () => {
             <button
               type="button"
               onClick={addDeduction}
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+              className="inline-flex items-center text-sm text-white hover:text-green-light"
             >
-              <Plus className="h-4 w-4 mr-1" /> Add Deduction
+              <Plus className="h-4 w-4 mr-1  text-white" /> Add Deduction
             </button>
           </div>
           <div className="space-y-2">

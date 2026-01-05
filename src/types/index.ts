@@ -16,6 +16,7 @@ export interface EmployeeInfo {
   department: string;
   bankAccount: string;
   panNumber: string;
+  ifscCode:string;
 }
 
 export interface SalaryDetails {
